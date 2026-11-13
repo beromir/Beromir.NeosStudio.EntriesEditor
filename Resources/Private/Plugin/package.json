@@ -1,0 +1,25 @@
+{
+  "name": "@beromir/neos-studio-entries-editor",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite build --watch",
+    "test": "node --test --experimental-strip-types test/*.test.ts"
+  },
+  "comment": "@medienreaktor/neos-studio provides the plugin API TYPES only (generated from the shell); at runtime it and react/react-dom are marked external in vite.config.ts and resolved from the shell's copy on window. All build/type-time only. Keep react majors aligned with the host so types match.",
+  "devDependencies": {
+    "@medienreaktor/neos-studio": "^2.2.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.0.3",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.4"
+  }
+}

@@ -1,0 +1,18 @@
+Medienreaktor:
+  NeosStudio:
+    # Build the bundle with
+    #   cd Resources/Private/Plugin && npm install && npm run build
+    # which emits the referenced files into Resources/Public/Plugin.
+    plugins:
+      'Beromir.NeosStudio.EntriesEditor':
+        javascript: 'resource://Beromir.NeosStudio.EntriesEditor/Public/Plugin/plugin.js'
+        stylesheet: 'resource://Beromir.NeosStudio.EntriesEditor/Public/Plugin/plugin.css'
+        position: 120
+
+Neos:
+  Neos:
+    userInterface:
+      translation:
+        autoInclude:
+          Beromir.NeosStudio.EntriesEditor:
+            - Main

@@ -1,0 +1,3 @@
+/Resources/Private/Plugin/test export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore

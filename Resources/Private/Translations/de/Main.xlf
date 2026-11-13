@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" product-name="Beromir.NeosStudio.EntriesEditor" source-language="en" target-language="de" datatype="plaintext">
+		<body>
+			<trans-unit id="addEntry" xml:space="preserve">
+				<source>Add entry</source>
+				<target>Eintrag hinzufügen</target>
+			</trans-unit>
+			<trans-unit id="edit" xml:space="preserve">
+				<source>Edit</source>
+				<target>Bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="entryFallback" xml:space="preserve">
+				<source>Entry {0}</source>
+				<target>Eintrag {0}</target>
+			</trans-unit>
+			<trans-unit id="entryInvalid" xml:space="preserve">
+				<source>This entry has errors</source>
+				<target>Dieser Eintrag enthält Fehler</target>
+			</trans-unit>
+			<trans-unit id="summary.empty" xml:space="preserve">
+				<source>No entries yet</source>
+				<target>Noch keine Einträge</target>
+			</trans-unit>
+			<trans-unit id="summary.more" xml:space="preserve">
+				<source>+{0} more</source>
+				<target>+{0} weitere</target>
+			</trans-unit>
+			<trans-unit id="dialog.empty" xml:space="preserve">
+				<source>No entries yet.</source>
+				<target>Noch keine Einträge.</target>
+			</trans-unit>
+			<trans-unit id="moveUp" xml:space="preserve">
+				<source>Move up</source>
+				<target>Nach oben</target>
+			</trans-unit>
+			<trans-unit id="moveDown" xml:space="preserve">
+				<source>Move down</source>
+				<target>Nach unten</target>
+			</trans-unit>
+			<trans-unit id="duplicate" xml:space="preserve">
+				<source>Duplicate</source>
+				<target>Duplizieren</target>
+			</trans-unit>
+			<trans-unit id="delete" xml:space="preserve">
+				<source>Delete</source>
+				<target>Löschen</target>
+			</trans-unit>
+			<trans-unit id="cancel" xml:space="preserve">
+				<source>Cancel</source>
+				<target>Abbrechen</target>
+			</trans-unit>
+			<trans-unit id="apply" xml:space="preserve">
+				<source>Apply</source>
+				<target>Übernehmen</target>
+			</trans-unit>
+			<trans-unit id="conflict.message" xml:space="preserve">
+				<source>Someone else changed this list while you were editing it.</source>
+				<target>Jemand anderes hat diese Liste geändert, während du sie bearbeitet hast.</target>
+			</trans-unit>
+			<trans-unit id="conflict.loadTheirs" xml:space="preserve">
+				<source>Load theirs</source>
+				<target>Deren Stand laden</target>
+			</trans-unit>
+			<trans-unit id="conflict.keepMine" xml:space="preserve">
+				<source>Keep mine</source>
+				<target>Meinen Stand behalten</target>
+			</trans-unit>
+			<trans-unit id="discard.title" xml:space="preserve">
+				<source>Discard changes?</source>
+				<target>Änderungen verwerfen?</target>
+			</trans-unit>
+			<trans-unit id="discard.description" xml:space="preserve">
+				<source>Your changes to this list have not been applied.</source>
+				<target>Deine Änderungen an dieser Liste wurden noch nicht übernommen.</target>
+			</trans-unit>
+			<trans-unit id="discard.confirm" xml:space="preserve">
+				<source>Discard</source>
+				<target>Verwerfen</target>
+			</trans-unit>
+			<trans-unit id="editorMissing" xml:space="preserve">
+				<source>Editor not available: {0}</source>
+				<target>Editor nicht verfügbar: {0}</target>
+			</trans-unit>
+			<trans-unit id="editorFailed" xml:space="preserve">
+				<source>This field could not be displayed.</source>
+				<target>Dieses Feld konnte nicht angezeigt werden.</target>
+			</trans-unit>
+			<group id="summary.count" restype="x-gettext-plurals">
+				<trans-unit id="summary.count[0]" xml:space="preserve">
+					<source>{0} entry</source>
+					<target>{0} Eintrag</target>
+				</trans-unit>
+				<trans-unit id="summary.count[1]" xml:space="preserve">
+					<source>{0} entries</source>
+					<target>{0} Einträge</target>
+				</trans-unit>
+			</group>
+			<group id="invalidEntries" restype="x-gettext-plurals">
+				<trans-unit id="invalidEntries[0]" xml:space="preserve">
+					<source>{0} entry has errors</source>
+					<target>{0} Eintrag enthält Fehler</target>
+				</trans-unit>
+				<trans-unit id="invalidEntries[1]" xml:space="preserve">
+					<source>{0} entries have errors</source>
+					<target>{0} Einträge enthalten Fehler</target>
+				</trans-unit>
+			</group>
+		</body>
+	</file>
+</xliff>

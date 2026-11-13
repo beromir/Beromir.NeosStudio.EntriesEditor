@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+	<file original="" product-name="Beromir.NeosStudio.EntriesEditor" source-language="en" datatype="plaintext">
+		<body>
+			<trans-unit id="addEntry" xml:space="preserve">
+				<source>Add entry</source>
+			</trans-unit>
+			<trans-unit id="edit" xml:space="preserve">
+				<source>Edit</source>
+			</trans-unit>
+			<trans-unit id="entryFallback" xml:space="preserve">
+				<source>Entry {0}</source>
+			</trans-unit>
+			<trans-unit id="entryInvalid" xml:space="preserve">
+				<source>This entry has errors</source>
+			</trans-unit>
+			<trans-unit id="summary.empty" xml:space="preserve">
+				<source>No entries yet</source>
+			</trans-unit>
+			<trans-unit id="summary.more" xml:space="preserve">
+				<source>+{0} more</source>
+			</trans-unit>
+			<trans-unit id="dialog.empty" xml:space="preserve">
+				<source>No entries yet.</source>
+			</trans-unit>
+			<trans-unit id="moveUp" xml:space="preserve">
+				<source>Move up</source>
+			</trans-unit>
+			<trans-unit id="moveDown" xml:space="preserve">
+				<source>Move down</source>
+			</trans-unit>
+			<trans-unit id="duplicate" xml:space="preserve">
+				<source>Duplicate</source>
+			</trans-unit>
+			<trans-unit id="delete" xml:space="preserve">
+				<source>Delete</source>
+			</trans-unit>
+			<trans-unit id="cancel" xml:space="preserve">
+				<source>Cancel</source>
+			</trans-unit>
+			<trans-unit id="apply" xml:space="preserve">
+				<source>Apply</source>
+			</trans-unit>
+			<trans-unit id="conflict.message" xml:space="preserve">
+				<source>Someone else changed this list while you were editing it.</source>
+			</trans-unit>
+			<trans-unit id="conflict.loadTheirs" xml:space="preserve">
+				<source>Load theirs</source>
+			</trans-unit>
+			<trans-unit id="conflict.keepMine" xml:space="preserve">
+				<source>Keep mine</source>
+			</trans-unit>
+			<trans-unit id="discard.title" xml:space="preserve">
+				<source>Discard changes?</source>
+			</trans-unit>
+			<trans-unit id="discard.description" xml:space="preserve">
+				<source>Your changes to this list have not been applied.</source>
+			</trans-unit>
+			<trans-unit id="discard.confirm" xml:space="preserve">
+				<source>Discard</source>
+			</trans-unit>
+			<trans-unit id="editorMissing" xml:space="preserve">
+				<source>Editor not available: {0}</source>
+			</trans-unit>
+			<trans-unit id="editorFailed" xml:space="preserve">
+				<source>This field could not be displayed.</source>
+			</trans-unit>
+			<group id="summary.count" restype="x-gettext-plurals">
+				<trans-unit id="summary.count[0]" xml:space="preserve">
+					<source>{0} entry</source>
+				</trans-unit>
+				<trans-unit id="summary.count[1]" xml:space="preserve">
+					<source>{0} entries</source>
+				</trans-unit>
+			</group>
+			<group id="invalidEntries" restype="x-gettext-plurals">
+				<trans-unit id="invalidEntries[0]" xml:space="preserve">
+					<source>{0} entry has errors</source>
+				</trans-unit>
+				<trans-unit id="invalidEntries[1]" xml:space="preserve">
+					<source>{0} entries have errors</source>
+				</trans-unit>
+			</group>
+		</body>
+	</file>
+</xliff>

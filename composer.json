@@ -1,0 +1,32 @@
+{
+    "name": "beromir/neos-studio-entries-editor",
+    "type": "neos-plugin",
+    "description": "The entries editor for Neos Studio: edit a list of entries (e.g. icon, heading and text) stored in one array property, in a dialog composed of Studio's own property editors. Registers as Beromir.EntriesEditor/Editor.",
+    "license": "GPL-3.0-or-later",
+    "keywords": [
+        "neos",
+        "neoscms",
+        "flow",
+        "editor",
+        "neos-studio"
+    ],
+    "authors": [
+        {
+            "name": "Henrik Reißig",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "neos/neos": "^9.2",
+        "medienreaktor/neos-studio": "^2.1"
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Beromir.NeosStudio.EntriesEditor"
+        },
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        }
+    }
+}
