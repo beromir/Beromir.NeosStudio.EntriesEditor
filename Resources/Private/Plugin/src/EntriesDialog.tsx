@@ -23,15 +23,23 @@ import {
   type NodeAddress,
 } from '@medienreaktor/neos-studio'
 import {
+  copyTouched,
   createEntry,
+  dropTouched,
   duplicateEntry,
+  firstInvalid,
   humanize,
   moveItem,
   neighbourAfterRemoval,
+  touchEntries,
+  touchField,
   validateEntries,
+  valueKey,
+  visibleErrors,
   type DialogSize,
   type Entry,
   type FieldConfig,
+  type TouchedFields,
   type ValidatorLookup,
 } from './entries'
 import { configuredLabel, rowLabel, t, tp } from './i18n'
@@ -47,6 +55,8 @@ interface EntriesDialogProps {
   addLabel: string
   nodeAddress: NodeAddress | undefined
   draft: Entry[]
+  /** The stored entries: those in the draft count as touched. */
+  stored: Entry[]
   selectedId: string | null
   revision: number
   dirty: boolean
@@ -68,6 +78,7 @@ export function EntriesDialog({
   addLabel,
   nodeAddress,
   draft,
+  stored,
   selectedId,
   revision,
   dirty,
@@ -90,11 +101,11 @@ export function EntriesDialog({
   // unmount, move or disable the focused control, which drops focus to the dialog.
   // 'form' is the selected entry's first field, else the empty list's add button.
   const focusRequest = useRef<string | null>(null)
+  // Stored entries count as touched, so stored invalid data is flagged right away.
+  const touchStored = () => touchEntries({}, stored.map((entry) => entry._id))
+  const [touched, setTouched] = useState<TouchedFields>(touchStored)
 
-  const firstField = () =>
-    formRef.current?.querySelector<HTMLElement>(
-      'input, textarea, select, button, [contenteditable="true"], [tabindex]:not([tabindex="-1"])',
-    ) ?? null
+  const firstField = () => focusableIn(formRef.current)
 
   // Every action that requests focus also changes state, so a render follows.
   useLayoutEffect(() => {
@@ -105,7 +116,9 @@ export function EntriesDialog({
       key === 'form'
         ? (firstField() ?? emptyAddRef.current?.querySelector('button'))
         : document.querySelector<HTMLElement>(`[data-focus-key="${key}"]`)
-    element?.focus()
+    // A field's key marks its wrapper; focus goes to the editor's control inside.
+    const target = element?.matches(FOCUSABLE) ? element : focusableIn(element)
+    target?.focus()
   })
 
   const select = (id: string | null) => {
@@ -130,7 +143,9 @@ export function EntriesDialog({
     () => validateEntries(draft, fields, lookupValidator),
     [draft, fields],
   )
-  const invalidCount = draft.filter((entry) => errors[entry._id]).length
+  const shown = useMemo(() => visibleErrors(errors, touched), [errors, touched])
+  const invalid = draft.some((entry) => errors[entry._id])
+  const shownCount = draft.filter((entry) => shown[entry._id]).length
   const selectedIndex = draft.findIndex((entry) => entry._id === selectedId)
   const selected = selectedIndex === -1 ? null : draft[selectedIndex]
 
@@ -148,6 +163,7 @@ export function EntriesDialog({
   const duplicate = (id: string) => {
     const [next, copyId] = duplicateEntry(draft, id)
     onDraftChange(() => next)
+    if (copyId !== null) setTouched((current) => copyTouched(current, id, copyId))
     select(copyId)
   }
 
@@ -156,12 +172,29 @@ export function EntriesDialog({
     if (next === null) focusRequest.current = 'form'
     onSelect(next)
     onDraftChange((current) => current.filter((entry) => entry._id !== id))
+    setTouched((current) => dropTouched(current, id))
   }
 
-  const setFieldValue = (id: string, field: string, value: unknown) =>
+  const touch = (id: string, field: string) =>
+    setTouched((current) => touchField(current, id, field))
+
+  const setFieldValue = (entry: Entry, field: string, value: unknown) => {
+    // Some editors report their value without a change (on mount, say), which is no edit.
+    if (valueKey(value) !== valueKey(entry[field])) touch(entry._id, field)
     onDraftChange((current) =>
-      current.map((entry) => (entry._id === id ? { ...entry, [field]: value } : entry)),
+      current.map((item) => (item._id === entry._id ? { ...item, [field]: value } : item)),
     )
+  }
+
+  // Apply stays disabled while an entry is invalid; trying it anyway reveals every error
+  // and takes the editor to the first one.
+  const attemptApply = () => {
+    setTouched((current) => touchEntries(current, draft.map((entry) => entry._id)))
+    const target = firstInvalid(draft, fields, errors, selectedId)
+    if (!target) return
+    focusRequest.current = `field:${target.field}`
+    if (target.id !== selectedId) onSelect(target.id)
+  }
 
   const labelOf = (entry: Entry, index: number) => rowLabel(entry, index, labelTemplate, fields)
 
@@ -190,6 +223,7 @@ export function EntriesDialog({
               size="sm"
               onClick={() => {
                 focusRequest.current = 'form'
+                setTouched(touchStored())
                 onLoadTheirs()
               }}
             >
@@ -280,7 +314,7 @@ export function EntriesDialog({
                       }}
                     >
                       <span className="bese-row-label">{labelOf(entry, index)}</span>
-                      {errors[entry._id] && (
+                      {shown[entry._id] && (
                         <span
                           className="bese-row-error"
                           role="img"
@@ -336,9 +370,10 @@ export function EntriesDialog({
                         key={field.name}
                         field={field}
                         value={selected[field.name]}
-                        errors={errors[selected._id]?.[field.name] ?? []}
+                        errors={shown[selected._id]?.[field.name] ?? []}
                         nodeAddress={nodeAddress}
-                        onValue={(value) => setFieldValue(selected._id, field.name, value)}
+                        onValue={(value) => setFieldValue(selected, field.name, value)}
+                        onTouch={() => touch(selected._id, field.name)}
                       />
                     ))}
                   </div>
@@ -349,9 +384,9 @@ export function EntriesDialog({
         )}
 
         <DialogFooter className="bese-footer">
-          {invalidCount > 0 && (
+          {shownCount > 0 && (
             <span className="bese-footer-errors">
-              {tp('invalidEntries', invalidCount, [
+              {tp('invalidEntries', shownCount, [
                 '{0} entry has errors',
                 '{0} entries have errors',
               ])}
@@ -360,13 +395,19 @@ export function EntriesDialog({
           <Button variant="outline" onClick={requestClose}>
             {t('cancel', 'Cancel')}
           </Button>
-          <Button
-            data-focus-key="apply"
-            disabled={invalidCount > 0 || conflict}
-            onClick={() => onApply(draft)}
+          {/* A disabled button takes no pointer events, so a click on it lands here. */}
+          <span
+            className="bese-apply"
+            onClick={() => invalid && !conflict && attemptApply()}
           >
-            {t('apply', 'Apply')}
-          </Button>
+            <Button
+              data-focus-key="apply"
+              disabled={invalid || conflict}
+              onClick={() => onApply(draft)}
+            >
+              {t('apply', 'Apply')}
+            </Button>
+          </span>
         </DialogFooter>
 
         <ConfirmDialog
@@ -422,14 +463,30 @@ function EntryField({
   errors,
   nodeAddress,
   onValue,
+  onTouch,
 }: {
   field: FieldConfig
   value: unknown
   errors: string[]
   nodeAddress: NodeAddress | undefined
   onValue: (value: unknown) => void
+  onTouch: () => void
 }) {
   const id = useId()
+  // Popups such as a select box's list are portalled out of the field, but their events
+  // still bubble here through React: a blur only counts when no refocus follows. Focus the
+  // dialog moved here itself (a new entry's first field) is not left by the editor.
+  const pendingBlur = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const used = useRef(false)
+  const focusHandlers = {
+    onPointerDown: () => (used.current = true),
+    onKeyDown: () => (used.current = true),
+    onFocus: () => clearTimeout(pendingBlur.current),
+    onBlur: () => {
+      clearTimeout(pendingBlur.current)
+      if (used.current) pendingBlur.current = setTimeout(onTouch)
+    },
+  }
   const definition = editors.getDefinition(field.editor)
   const label = configuredLabel(field.label, humanize(field.name))
   const errorLines =
@@ -443,7 +500,7 @@ function EntryField({
 
   if (!definition) {
     return (
-      <div className="bese-field">
+      <div className="bese-field" data-focus-key={`field:${field.name}`}>
         <Field label={label}>
           <div className="bese-notice">
             {t('editorMissing', 'Editor not available: {0}', [field.editor])}
@@ -471,7 +528,7 @@ function EntryField({
   )
 
   return (
-    <div className="bese-field">
+    <div className="bese-field" data-focus-key={`field:${field.name}`} {...focusHandlers}>
       {definition.rendersOwnLabel ? (
         control
       ) : (
@@ -482,6 +539,13 @@ function EntryField({
       {errorLines}
     </div>
   )
+}
+
+const FOCUSABLE =
+  'input, textarea, select, button, [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
+
+function focusableIn(root: HTMLElement | null | undefined): HTMLElement | null {
+  return root?.querySelector<HTMLElement>(FOCUSABLE) ?? null
 }
 
 /** A crashing field editor (a plugin's, say) becomes a notice instead of taking the dialog down. */

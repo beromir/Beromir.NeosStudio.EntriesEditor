@@ -1,17 +1,24 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
+  copyTouched,
   createEntry,
+  dropTouched,
   duplicateEntry,
   entryLabel,
+  firstInvalid,
   isTranslationId,
   moveItem,
   neighbourAfterRemoval,
   normalizeEntries,
   parseFields,
   parseOptions,
+  touchEntries,
+  touchField,
   validateEntries,
   valueKey,
+  visibleErrors,
+  type EntryErrors,
   type ValidatorLookup,
 } from '../src/entries.ts'
 
@@ -122,6 +129,54 @@ test('validateEntries reports per entry and field, skipping unknown and throwing
   } finally {
     console.error = originalError
   }
+})
+
+const required = parseFields({
+  icon: { validation: { 'Neos.Neos/Validation/NotEmptyValidator': [] } },
+  heading: { validation: { 'Neos.Neos/Validation/NotEmptyValidator': [] } },
+})
+const errors: EntryErrors = {
+  a: { icon: ['required'], heading: ['required'] },
+  b: { heading: ['required'] },
+}
+
+test('visibleErrors shows only errors of touched fields', () => {
+  assert.deepEqual(visibleErrors(errors, {}), {})
+  assert.deepEqual(visibleErrors(errors, { a: ['heading'], b: ['icon'] }), {
+    a: { heading: ['required'] },
+  })
+  assert.deepEqual(visibleErrors(errors, { b: true }), { b: { heading: ['required'] } })
+})
+
+test('touchField adds a field once and keeps fully touched entries', () => {
+  const once = touchField({}, 'a', 'icon')
+  assert.deepEqual(once, { a: ['icon'] })
+  assert.equal(touchField(once, 'a', 'icon'), once)
+  assert.deepEqual(touchField(once, 'a', 'heading'), { a: ['icon', 'heading'] })
+  const all = { a: true as const }
+  assert.equal(touchField(all, 'a', 'icon'), all)
+})
+
+test('touchEntries marks every field of the given entries as touched', () => {
+  assert.deepEqual(touchEntries({ a: ['icon'] }, ['a', 'b']), { a: true, b: true })
+})
+
+test('copyTouched copies the source state to a duplicate, dropTouched removes it', () => {
+  const touched = { a: ['icon'] }
+  const copied = copyTouched(touched, 'a', 'copy')
+  assert.deepEqual(copied, { a: ['icon'], copy: ['icon'] })
+  assert.deepEqual(copyTouched({ a: true }, 'a', 'copy'), { a: true, copy: true })
+  assert.deepEqual(copyTouched({}, 'a', 'copy'), {})
+  assert.deepEqual(dropTouched(copied, 'a'), { copy: ['icon'] })
+  assert.deepEqual(dropTouched(touched, 'missing'), touched)
+})
+
+test('firstInvalid prefers the selected entry, else the first invalid in list order', () => {
+  const entries = [{ _id: 'ok' }, { _id: 'b' }, { _id: 'a' }]
+  assert.deepEqual(firstInvalid(entries, required, errors), { id: 'b', field: 'heading' })
+  assert.deepEqual(firstInvalid(entries, required, errors, 'a'), { id: 'a', field: 'icon' })
+  assert.deepEqual(firstInvalid(entries, required, errors, 'ok'), { id: 'b', field: 'heading' })
+  assert.equal(firstInvalid(entries, required, {}), null)
 })
 
 test('valueKey ignores object key order', () => {

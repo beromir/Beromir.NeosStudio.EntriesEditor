@@ -218,6 +218,64 @@ export function validateEntries(
   return result
 }
 
+/** Per entry id, the fields the editor has touched; `true` counts every field as touched. */
+export type TouchedFields = Record<string, true | string[]>
+
+export function touchEntries(touched: TouchedFields, ids: string[]): TouchedFields {
+  const next = { ...touched }
+  for (const id of ids) next[id] = true
+  return next
+}
+
+export function touchField(touched: TouchedFields, id: string, field: string): TouchedFields {
+  const current = touched[id]
+  if (current === true || current?.includes(field)) return touched
+  return { ...touched, [id]: [...(current ?? []), field] }
+}
+
+export function copyTouched(touched: TouchedFields, from: string, to: string): TouchedFields {
+  // Touched lists are never mutated, so the copy can share the source's.
+  return from in touched ? { ...touched, [to]: touched[from] } : touched
+}
+
+export function dropTouched(touched: TouchedFields, id: string): TouchedFields {
+  const { [id]: _, ...rest } = touched
+  return rest
+}
+
+/** The errors to show: only those of touched fields. */
+export function visibleErrors(errors: EntryErrors, touched: TouchedFields): EntryErrors {
+  const result: EntryErrors = {}
+  for (const [id, fieldErrors] of Object.entries(errors)) {
+    const entryTouched = touched[id]
+    if (entryTouched === undefined) continue
+    for (const [field, messages] of Object.entries(fieldErrors)) {
+      if (entryTouched !== true && !entryTouched.includes(field)) continue
+      result[id] ??= {}
+      result[id][field] = messages
+    }
+  }
+  return result
+}
+
+/** The first invalid field in list and field order, starting with `preferId` when it is invalid. */
+export function firstInvalid(
+  entries: Entry[],
+  fields: FieldConfig[],
+  errors: EntryErrors,
+  preferId: string | null = null,
+): { id: string; field: string } | null {
+  const ids =
+    preferId !== null && errors[preferId]
+      ? [preferId]
+      : entries.map((entry) => entry._id).filter((id) => errors[id])
+  for (const id of ids) {
+    const field = fields.find((candidate) => errors[id]?.[candidate.name])
+    if (field) return { id, field: field.name }
+  }
+  return null
+}
+
 /** A stable comparison key for stored values, independent of object key order. */
 export function valueKey(value: unknown): string {
   return JSON.stringify(value ?? null, (_, item: unknown) =>

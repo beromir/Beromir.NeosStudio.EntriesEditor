@@ -260,3 +260,7 @@
   font-size: var(--text-small);
   line-height: var(--text-small--line-height);
 }
+
+.bese-apply {
+  display: inline-flex;
+}

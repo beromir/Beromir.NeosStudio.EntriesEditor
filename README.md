@@ -88,7 +88,7 @@ English only, flush the XLIFF cache once:
 | `type`          | `string`                      | Handed to the editor as `subject.type`; also picks the default editor (`string`, `integer`: text field, `boolean`: checkbox, `array`: select box). |
 | `editor`        | by `type`                     | Any registered Studio property editor id. |
 | `editorOptions` | `{}`                          | Passed to that editor, as for a node property. |
-| `validation`    | `{}`                          | Validators as for a node property, e.g. `'Neos.Neos/Validation/StringLengthValidator': {maximum: 80}`. Errors show under the field and mark the row; Apply stays disabled until every entry is valid. |
+| `validation`    | `{}`                          | Validators as for a node property, e.g. `'Neos.Neos/Validation/StringLengthValidator': {maximum: 80}`. Every entry is validated on each change and Apply stays disabled until all are valid. Errors show under the field and mark the row once the field was edited or left, or Apply was tried; stored entries show theirs right away. |
 | `defaultValue`  | -                             | The value a new entry starts with. |
 
 Supported in v1 are editors that store plain values: `TextFieldEditor`,

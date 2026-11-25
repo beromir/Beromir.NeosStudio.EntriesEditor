@@ -110,6 +110,7 @@ export function EntriesEditor({
           addLabel={addLabel}
           nodeAddress={nodeAddress}
           draft={session.draft}
+          stored={entries}
           selectedId={session.selectedId}
           revision={session.revision}
           dirty={valueKey(session.draft) !== session.initialKey}

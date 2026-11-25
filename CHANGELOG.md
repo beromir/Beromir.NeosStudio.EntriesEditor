@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Errors of a new entry show once a field was edited or Apply was tried, not
+  right after adding it. Clicking the disabled Apply button shows all errors
+  and goes to the first invalid field. Stored entries still show their errors
+  right away.
+
 ## [1.0.0] - 2026-11-13
 
 ### Added
