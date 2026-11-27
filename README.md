@@ -1,5 +1,7 @@
 # Beromir.NeosStudio.EntriesEditor
 
+![Entries Editor for Neos Studio](Documentation/Banner.png)
+
 The entries editor for **Neos Studio** (`Medienreaktor.NeosStudio`). It edits
 a list of entries - say an icon, a heading and a text, many times over - in
 one `array` property, instead of a content collection with child nodes.
