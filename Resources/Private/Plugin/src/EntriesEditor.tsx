@@ -84,7 +84,12 @@ export function EntriesEditor({
                 className="bese-summary-row"
                 onClick={() => open(index)}
               >
-                <RowText label={labelOf(entry, index)} />
+                <span className="bese-summary-index" aria-hidden>
+                  {index + 1}
+                </span>
+                <span className="bese-summary-label">
+                  <RowText label={labelOf(entry, index)} />
+                </span>
               </button>
             </li>
           ))}

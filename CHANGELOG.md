@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the field's format, a link's page or asset title, a reference's target
   label. Rows of existing lists read differently. A row pointing at a
   removed page or asset reads "Missing" there and gets a warning icon.
+- The inspector summary numbers its entries, separates them with lines and
+  wraps a label to two lines instead of cutting it off after one.
 - Requires Neos Studio 2.10 (`medienreaktor/neos-studio` `^2.10`).
 
 ## [1.1.0] - 2026-11-25

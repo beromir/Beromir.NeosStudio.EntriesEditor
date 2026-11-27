@@ -15,26 +15,30 @@
 
 .bese-summary-list {
   margin: 0;
-  padding: calc(var(--spacing) * 1);
+  padding: 0;
+  overflow: hidden;
   list-style: none;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  background: var(--color-background);
+}
+
+.bese-summary-list > li + li {
+  border-top: 1px solid var(--color-border);
 }
 
 .bese-summary-row {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--spacing) * 2);
   width: 100%;
-  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
+  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
   border: 0;
-  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-foreground);
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
   text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   cursor: pointer;
 }
 
@@ -48,12 +52,34 @@
   outline-offset: -2px;
 }
 
+.bese-summary-index {
+  flex-shrink: 0;
+  min-width: 1ch;
+  color: var(--color-muted-foreground);
+  font-size: var(--text-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Two lines before cutting off: a row label joins several fields. */
+.bese-summary-label {
+  display: -webkit-box;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .bese-summary-more {
-  padding: calc(var(--spacing) * 1) calc(var(--spacing) * 2);
+  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2.5);
+  padding-left: calc(var(--spacing) * 4.5 + 1ch);
   color: var(--color-muted-foreground);
   font-size: var(--text-small);
   line-height: var(--text-small--line-height);
 }
+
 
 .bese-summary-footer {
   display: flex;
