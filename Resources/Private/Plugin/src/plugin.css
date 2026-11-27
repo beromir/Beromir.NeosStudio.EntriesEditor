@@ -264,3 +264,11 @@
 .bese-apply {
   display: inline-flex;
 }
+
+/* Missing targets */
+
+.bese-missing {
+  margin-right: calc(var(--spacing) * 1.5);
+  color: var(--color-warning-text);
+}
+

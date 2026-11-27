@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- References to nodes as entry fields: `type: reference` or `references`
+  (or Studio's `ReferenceEditor` / `ReferencesEditor`) store the target's
+  node aggregate id as a plain string or a list of ids, not as a Neos graph
+  reference. A stored id that no longer resolves shows as missing and is
+  kept until another node is picked or it is removed.
+- The `LinkEditor` is supported as an entry field, with its `editorOptions`
+  (`assets`, `nodeTypes`, `placeholder`).
+- `labelValues: raw` shows values as stored in row labels and the summary,
+  as before.
+
+### Changed
+
+- Row labels and the inspector summary show values as their editors show
+  them: a select box's option label, a checked box's field label, a date in
+  the field's format, a link's page or asset title, a reference's target
+  label. Rows of existing lists read differently. A row pointing at a
+  removed page or asset reads "Missing" there and gets a warning icon.
+- Requires Neos Studio 2.10 (`medienreaktor/neos-studio` `^2.10`).
+
 ## [1.1.0] - 2026-11-25
 
 ### Changed

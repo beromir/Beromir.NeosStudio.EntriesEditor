@@ -65,6 +65,12 @@
 			<trans-unit id="editorFailed" xml:space="preserve">
 				<source>This field could not be displayed.</source>
 			</trans-unit>
+			<trans-unit id="entryMissing" xml:space="preserve">
+				<source>Points at something that no longer exists</source>
+			</trans-unit>
+			<trans-unit id="valueMissing" xml:space="preserve">
+				<source>Missing</source>
+			</trans-unit>
 			<group id="summary.count" restype="x-gettext-plurals">
 				<trans-unit id="summary.count[0]" xml:space="preserve">
 					<source>{0} entry</source>

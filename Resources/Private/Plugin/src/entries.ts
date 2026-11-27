@@ -16,6 +16,9 @@ export interface FieldConfig {
 
 export type DialogSize = 'lg' | 'xl' | 'full'
 
+/** How row labels show values: as their editors show them, or as stored. */
+export type LabelValues = 'formatted' | 'raw'
+
 export interface EntriesOptions {
   fields: FieldConfig[]
   labelTemplate: string | undefined
@@ -23,6 +26,7 @@ export interface EntriesOptions {
   dialogSize: DialogSize
   addLabel: string | undefined
   summaryRows: number
+  labelValues: LabelValues
 }
 
 // Mirrors Studio's own type defaults (Neos.Neos.userInterface.inspector.dataTypes)
@@ -33,6 +37,15 @@ const DATA_TYPE_EDITORS: Record<string, string> = {
   boolean: 'Neos.Neos/Inspector/Editors/BooleanEditor',
   array: 'Neos.Neos/Inspector/Editors/SelectBoxEditor',
   DateTime: 'Neos.Neos/Inspector/Editors/DateTimeEditor',
+  reference: 'Neos.Neos/Inspector/Editors/ReferenceEditor',
+  references: 'Neos.Neos/Inspector/Editors/ReferencesEditor',
+}
+
+// An entry stores a reference as the target's id. The reference editors only edit
+// graph references for these subject types, so the field gets the plain type instead.
+const VALUE_TYPES: Record<string, string> = {
+  reference: 'string',
+  references: 'array',
 }
 
 const DIALOG_SIZES: DialogSize[] = ['lg', 'xl', 'full']
@@ -47,15 +60,15 @@ export function parseFields(raw: unknown): FieldConfig[] {
   for (const [name, config] of Object.entries(raw)) {
     // `_id` is the entry's own key; a field must not overwrite it.
     if (name === '_id' || !isRecord(config)) continue
-    const type = typeof config.type === 'string' ? config.type : 'string'
+    const configured = typeof config.type === 'string' ? config.type : 'string'
     fields.push({
       name,
       label: typeof config.label === 'string' ? config.label : undefined,
-      type,
+      type: VALUE_TYPES[configured] ?? configured,
       editor:
         typeof config.editor === 'string'
           ? config.editor
-          : (DATA_TYPE_EDITORS[type] ?? DATA_TYPE_EDITORS.string),
+          : (DATA_TYPE_EDITORS[configured] ?? DATA_TYPE_EDITORS.string),
       editorOptions: isRecord(config.editorOptions) ? config.editorOptions : {},
       validation: isRecord(config.validation) ? config.validation : {},
       defaultValue: config.defaultValue,
@@ -78,6 +91,7 @@ export function parseOptions(options: Record<string, unknown>): EntriesOptions {
     addLabel: typeof options.addLabel === 'string' ? options.addLabel : undefined,
     summaryRows:
       Number.isInteger(summaryRows) && summaryRows >= 0 ? summaryRows : 3,
+    labelValues: options.labelValues === 'raw' ? 'raw' : 'formatted',
   }
 }
 
@@ -150,20 +164,57 @@ function placeholderText(value: unknown): string {
   return ''
 }
 
+const PLACEHOLDER = /\{([^{}]+)\}/g
+
+function effectiveTemplate(template: string | undefined, fields: FieldConfig[]): string {
+  return template ?? (fields[0] ? `{${fields[0].name}}` : '')
+}
+
+/** The entry keys a label template reads, each once, in template order. */
+export function templateKeys(template: string | undefined, fields: FieldConfig[]): string[] {
+  const keys = [...effectiveTemplate(template, fields).matchAll(PLACEHOLDER)].map((match) =>
+    match[1].trim(),
+  )
+  return [...new Set(keys)]
+}
+
+/** A value as its editor shows it (Studio's FormattedValue). */
+export interface ShownValue {
+  label: string
+  missing?: boolean
+}
+
+/**
+ * What a placeholder shows for a value: its label once resolved (null: nothing
+ * to show), undefined while it is still resolving - the stored value shows then.
+ */
+export type ShownValueLookup = (key: string, value: unknown) => ShownValue | null | undefined
+
+export interface EntryLabel {
+  /** null when every placeholder is empty, so the caller can fall back to "Entry n". */
+  label: string | null
+  /** A value in the label points at something that no longer resolves. */
+  missing: boolean
+}
+
 /**
  * The row label from a '{field}' template. Without a template the first
- * field labels the row. Returns null when every placeholder is empty, so the
- * caller can fall back to "Entry n" instead of showing bare separators.
+ * field labels the row. Without `shown`, values show as stored.
  */
-export function entryLabel(
+export function resolveEntryLabel(
   entry: Entry,
   template: string | undefined,
   fields: FieldConfig[],
-): string | null {
-  const effective = template ?? (fields[0] ? `{${fields[0].name}}` : '')
+  shown?: ShownValueLookup,
+): EntryLabel {
   let filled = false
-  const label = effective.replace(/\{([^{}]+)\}/g, (_, key: string) => {
-    const text = placeholderText(entry[key.trim()])
+  let missing = false
+  const label = effectiveTemplate(template, fields).replace(PLACEHOLDER, (_, raw: string) => {
+    const key = raw.trim()
+    const value = entry[key]
+    const formatted = shown?.(key, value)
+    if (formatted?.missing) missing = true
+    const text = (formatted === undefined ? placeholderText(value) : (formatted?.label ?? ''))
       // Rich text or textarea content in a one-line label.
       .replace(/<[^>]*>/g, ' ')
       .replace(/\s+/g, ' ')
@@ -171,7 +222,16 @@ export function entryLabel(
     if (text !== '') filled = true
     return text
   })
-  return filled ? label.trim() : null
+  return { label: filled ? label.trim() : null, missing }
+}
+
+/** The row label with values as stored; null when every placeholder is empty. */
+export function entryLabel(
+  entry: Entry,
+  template: string | undefined,
+  fields: FieldConfig[],
+): string | null {
+  return resolveEntryLabel(entry, template, fields).label
 }
 
 export type ValidatorLookup = (

@@ -13,7 +13,9 @@ import {
   valueKey,
   type Entry,
 } from './entries'
-import { configuredLabel, rowLabel, t, tp, useTranslationsReady } from './i18n'
+import { configuredLabel, t, tp, useTranslationsReady } from './i18n'
+import { RowText } from './RowText'
+import { useEntryLabels } from './useEntryLabels'
 
 interface Session {
   draft: Entry[]
@@ -63,7 +65,11 @@ export function EntriesEditor({
     setSession(null)
   }
 
-  const visible = entries.slice(0, options.summaryRows)
+  const visible = useMemo(
+    () => entries.slice(0, options.summaryRows),
+    [entries, options.summaryRows],
+  )
+  const labelOf = useEntryLabels(visible, options, nodeAddress)
   const more = entries.length - visible.length
   const addLabel = configuredLabel(options.addLabel, t('addEntry', 'Add entry'))
 
@@ -78,7 +84,7 @@ export function EntriesEditor({
                 className="bese-summary-row"
                 onClick={() => open(index)}
               >
-                {rowLabel(entry, index, options.labelTemplate, options.fields)}
+                <RowText label={labelOf(entry, index)} />
               </button>
             </li>
           ))}
@@ -106,7 +112,7 @@ export function EntriesEditor({
           title={configuredLabel(options.dialogTitle, subject.label)}
           size={options.dialogSize}
           fields={options.fields}
-          labelTemplate={options.labelTemplate}
+          labelOptions={options}
           addLabel={addLabel}
           nodeAddress={nodeAddress}
           draft={session.draft}
@@ -145,3 +151,4 @@ export function EntriesEditor({
     </div>
   )
 }
+

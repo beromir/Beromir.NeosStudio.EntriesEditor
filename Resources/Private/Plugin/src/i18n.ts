@@ -5,7 +5,7 @@ import {
   translationsLoaded,
   type TranslateArgs,
 } from '@medienreaktor/neos-studio'
-import { entryLabel, isTranslationId, type Entry, type FieldConfig } from './entries'
+import { isTranslationId } from './entries'
 
 const SOURCE = 'Beromir.NeosStudio.EntriesEditor:Main:'
 
@@ -21,16 +21,6 @@ export function tp(id: string, count: number, fallback: [string, string]): strin
 export function configuredLabel(configured: string | undefined, fallback: string): string {
   if (!configured) return fallback
   return isTranslationId(configured) ? translate(configured, fallback) : configured
-}
-
-/** An entry's label from the template, else "Entry n". */
-export function rowLabel(
-  entry: Entry,
-  index: number,
-  template: string | undefined,
-  fields: FieldConfig[],
-): string {
-  return entryLabel(entry, template, fields) ?? t('entryFallback', 'Entry {0}', [index + 1])
 }
 
 let loaded = false

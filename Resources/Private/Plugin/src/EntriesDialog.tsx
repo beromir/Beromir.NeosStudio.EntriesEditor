@@ -37,12 +37,15 @@ import {
   valueKey,
   visibleErrors,
   type DialogSize,
+  type EntriesOptions,
   type Entry,
   type FieldConfig,
   type TouchedFields,
   type ValidatorLookup,
 } from './entries'
-import { configuredLabel, rowLabel, t, tp } from './i18n'
+import { configuredLabel, t, tp } from './i18n'
+import { RowText } from './RowText'
+import { useEntryLabels } from './useEntryLabels'
 
 const lookupValidator: ValidatorLookup = (id) => validators.get(id)?.validate
 
@@ -51,7 +54,7 @@ interface EntriesDialogProps {
   title: string
   size: DialogSize
   fields: FieldConfig[]
-  labelTemplate: string | undefined
+  labelOptions: EntriesOptions
   addLabel: string
   nodeAddress: NodeAddress | undefined
   draft: Entry[]
@@ -74,7 +77,7 @@ export function EntriesDialog({
   title,
   size,
   fields,
-  labelTemplate,
+  labelOptions,
   addLabel,
   nodeAddress,
   draft,
@@ -196,7 +199,7 @@ export function EntriesDialog({
     if (target.id !== selectedId) onSelect(target.id)
   }
 
-  const labelOf = (entry: Entry, index: number) => rowLabel(entry, index, labelTemplate, fields)
+  const labelOf = useEntryLabels(draft, labelOptions, nodeAddress)
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && requestClose()}>
@@ -313,7 +316,9 @@ export function EntriesDialog({
                         move(index, to)
                       }}
                     >
-                      <span className="bese-row-label">{labelOf(entry, index)}</span>
+                      <span className="bese-row-label">
+                        <RowText label={labelOf(entry, index)} />
+                      </span>
                       {shown[entry._id] && (
                         <span
                           className="bese-row-error"
@@ -337,7 +342,7 @@ export function EntriesDialog({
                 <>
                   <div className="bese-toolbar">
                     <span className="bese-toolbar-title">
-                      {labelOf(selected, selectedIndex)}
+                      <RowText label={labelOf(selected, selectedIndex)} />
                     </span>
                     <ToolbarButton
                       focusKey="move-up"

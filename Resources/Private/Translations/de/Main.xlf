@@ -86,6 +86,14 @@
 				<source>This field could not be displayed.</source>
 				<target>Dieses Feld konnte nicht angezeigt werden.</target>
 			</trans-unit>
+			<trans-unit id="entryMissing" xml:space="preserve">
+				<source>Points at something that no longer exists</source>
+				<target>Verweist auf etwas, das es nicht mehr gibt</target>
+			</trans-unit>
+			<trans-unit id="valueMissing" xml:space="preserve">
+				<source>Missing</source>
+				<target>Fehlt</target>
+			</trans-unit>
 			<group id="summary.count" restype="x-gettext-plurals">
 				<trans-unit id="summary.count[0]" xml:space="preserve">
 					<source>{0} entry</source>

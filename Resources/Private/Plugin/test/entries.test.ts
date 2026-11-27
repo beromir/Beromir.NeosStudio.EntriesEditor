@@ -13,12 +13,15 @@ import {
   normalizeEntries,
   parseFields,
   parseOptions,
+  resolveEntryLabel,
+  templateKeys,
   touchEntries,
   touchField,
   validateEntries,
   valueKey,
   visibleErrors,
   type EntryErrors,
+  type ShownValue,
   type ValidatorLookup,
 } from '../src/entries.ts'
 
@@ -49,6 +52,12 @@ test('parseOptions falls back for invalid sizes and row counts', () => {
   assert.equal(options.dialogSize, 'xl')
   assert.equal(options.summaryRows, 3)
   assert.equal(parseOptions({ dialogSize: 'full', summaryRows: 0 }).summaryRows, 0)
+})
+
+test('parseOptions shows formatted values unless labelValues is raw', () => {
+  assert.equal(parseOptions({}).labelValues, 'formatted')
+  assert.equal(parseOptions({ labelValues: 'raw' }).labelValues, 'raw')
+  assert.equal(parseOptions({ labelValues: 'other' }).labelValues, 'formatted')
 })
 
 test('normalizeEntries keeps unknown keys, adds missing and duplicate ids, drops non-objects', () => {
@@ -189,4 +198,89 @@ test('isTranslationId', () => {
   assert.ok(isTranslationId('Vendor.Site:NodeTypes.FeatureList:features'))
   assert.ok(!isTranslationId('Features: icon'))
   assert.ok(!isTranslationId('Features'))
+})
+
+test('templateKeys lists the keys a template reads, once each, or the first field', () => {
+  assert.deepEqual(templateKeys('{heading} – { text } ({heading})', fields), ['heading', 'text'])
+  assert.deepEqual(templateKeys(undefined, fields), ['icon'])
+  assert.deepEqual(templateKeys(undefined, []), [])
+})
+
+const labelFields = parseFields({
+  kind: { editor: 'Neos.Neos/Inspector/Editors/SelectBoxEditor' },
+  link: { editor: 'Neos.Neos/Inspector/Editors/LinkEditor' },
+  highlight: { type: 'boolean', label: 'Highlight' },
+})
+
+/** Stands in for Studio's formatters: labels by stored value, undefined while resolving. */
+function lookupFrom(labels: Record<string, ShownValue | null>) {
+  return (_key: string, value: unknown) =>
+    typeof value === 'string' || typeof value === 'boolean'
+      ? labels[String(value)]
+      : undefined
+}
+
+test('resolveEntryLabel shows option labels instead of stored values', () => {
+  const shown = lookupFrom({ fast: { label: 'Very fast' }, true: { label: 'Highlight' }, false: null })
+  const entry = { _id: 'a', kind: 'fast', highlight: true }
+  assert.deepEqual(resolveEntryLabel(entry, '{kind} · {highlight}', labelFields, shown), {
+    label: 'Very fast · Highlight',
+    missing: false,
+  })
+  // A false checkbox shows nothing, so an otherwise empty row falls back to "Entry n".
+  assert.deepEqual(
+    resolveEntryLabel({ _id: 'b', highlight: false }, '{highlight}', labelFields, shown),
+    { label: null, missing: false },
+  )
+})
+
+test('resolveEntryLabel shows the stored value while a label resolves, never an empty row', () => {
+  const entry = { _id: 'a', link: 'node://3f0c6a1e-0000-4000-8000-000000000001' }
+  assert.deepEqual(resolveEntryLabel(entry, '{link}', labelFields, () => undefined), {
+    label: 'node://3f0c6a1e-0000-4000-8000-000000000001',
+    missing: false,
+  })
+})
+
+test('resolveEntryLabel shows link targets and flags ones that no longer resolve', () => {
+  const shown = lookupFrom({
+    'node://page': { label: 'About us' },
+    'asset://file': { label: 'Price list.pdf' },
+    'node://gone': { label: 'node://gone', missing: true },
+    'https://example.com': { label: 'https://example.com' },
+  })
+  const label = (link: string) =>
+    resolveEntryLabel({ _id: 'a', link }, '{link}', labelFields, shown)
+  assert.deepEqual(label('node://page'), { label: 'About us', missing: false })
+  assert.deepEqual(label('asset://file'), { label: 'Price list.pdf', missing: false })
+  assert.deepEqual(label('https://example.com'), { label: 'https://example.com', missing: false })
+  assert.deepEqual(label('node://gone'), { label: 'node://gone', missing: true })
+})
+
+test('resolveEntryLabel keeps raw values for keys without a formatted value', () => {
+  const entry = { _id: 'a', kind: 'fast', legacy: 'kept' }
+  assert.deepEqual(
+    resolveEntryLabel(entry, '{kind} {legacy}', labelFields, (key) =>
+      key === 'kind' ? { label: 'Very fast' } : undefined,
+    ),
+    { label: 'Very fast kept', missing: false },
+  )
+})
+
+test('parseFields stores references as ids: the reference editors get a plain type', () => {
+  const parsed = parseFields({
+    location: { type: 'reference' },
+    related: { type: 'references' },
+    explicit: { type: 'reference', editor: 'Neos.Neos/Inspector/Editors/ReferenceEditor' },
+    plain: { editor: 'Neos.Neos/Inspector/Editors/ReferenceEditor' },
+  })
+  assert.deepEqual(
+    parsed.map((field) => [field.name, field.type, field.editor]),
+    [
+      ['location', 'string', 'Neos.Neos/Inspector/Editors/ReferenceEditor'],
+      ['related', 'array', 'Neos.Neos/Inspector/Editors/ReferencesEditor'],
+      ['explicit', 'string', 'Neos.Neos/Inspector/Editors/ReferenceEditor'],
+      ['plain', 'string', 'Neos.Neos/Inspector/Editors/ReferenceEditor'],
+    ],
+  )
 })
