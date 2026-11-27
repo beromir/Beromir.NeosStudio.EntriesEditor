@@ -19,7 +19,7 @@
     "require": {
         "php": "^8.4",
         "neos/neos": "^9.2",
-        "medienreaktor/neos-studio": "^2.1"
+        "medienreaktor/neos-studio": "^2.10"
     },
     "extra": {
         "neos": {
